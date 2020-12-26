@@ -1,21 +1,21 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
+import { func } from 'prop-types';
 import { toast } from 'react-toastify';
 import s from './Searchbar.module.css';
 
-class Searchbar extends Component {
-  state = {
-    imgName: '',
-  };
+const Searchbar = ({ onSubmit }) => {
+  // === State === //
+  const [imgName, setImgName] = useState('');
 
   // зміна state при зміні поля пошуку
-  onNameChange = e => {
-    this.setState({ imgName: e.currentTarget.value.toLowerCase() });
+  const onNameChange = e => {
+    const inputValue = e.currentTarget.value.toLowerCase();
+
+    setImgName(inputValue);
   };
 
   // Cабміт форми
-  onSubmitForm = e => {
-    const { imgName } = this.state;
-
+  const onSubmitForm = e => {
     e.preventDefault();
 
     // перевірка чи поле не є пустим
@@ -23,14 +23,11 @@ class Searchbar extends Component {
       return toast.error('Ведіть назву зображення');
     }
 
-    // надсилає imgCollection у Арр
-    this.props.onSubmit(imgName);
+    // надсилає пропом imgCollection у Арр
+    onSubmit(imgName);
   };
-
-  render() {
-    const { onSubmitForm, onNameChange } = this;
-
-    return (
+  return (
+    <>
       <header className={s.searchbar}>
         <form onSubmit={onSubmitForm} className={s.searchForm}>
           <button type="submit" className={s.searchForm__button}>
@@ -38,7 +35,7 @@ class Searchbar extends Component {
           </button>
 
           <input
-            value={this.state.imgName}
+            value={imgName}
             onChange={onNameChange}
             className={s.searchForm__input}
             type="text"
@@ -48,8 +45,12 @@ class Searchbar extends Component {
           />
         </form>
       </header>
-    );
-  }
-}
+    </>
+  );
+};
+
+Searchbar.propTypes = {
+  onSubmit: func.isRequired,
+};
 
 export default Searchbar;
