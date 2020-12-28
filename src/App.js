@@ -8,7 +8,7 @@ import ImageGallery from './Components/ImageGallery/ImageGallery';
 
 const App = () => {
   // === State === //
-  const [imgName, setImgName] = useState('');
+  const [imgName, getImgName] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [lrgImg, setLrgImg] = useState('');
   const [altImg, setAltImg] = useState('');
@@ -28,7 +28,7 @@ const App = () => {
   return (
     <div className={s.app}>
       <ToastContainer position="bottom-center" autoClose={2500} />
-      <Searchbar onSubmit={setImgName} />
+      <Searchbar onSubmit={getImgName} />
 
       <ImageGallery imgName={imgName} getModalData={getModalData} />
 

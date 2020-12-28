@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import Loader from 'react-loader-spinner';
 import fetchGallery from '../../api/apiServise';
 import Button from '../Button/Button';
@@ -6,118 +6,124 @@ import ErrorView from '../ErrorView';
 import s from './ImageGallery.module.css';
 import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
 
-export class ImageGallery extends Component {
-  state = {
-    imgCollection: [],
-    pageNum: 1,
-    error: null,
-    status: 'idle',
-  };
+import { string, func } from 'prop-types';
 
-  // Новий Сабміт
-  componentDidUpdate(prevProps, prevState) {
-    const prevImgName = prevProps.imgName;
-    const prevPageNum = prevState.pageNum;
-    const currentImgName = this.props.imgName;
-    const { pageNum } = this.state;
+const ImageGallery = ({ imgName, getModalData }) => {
+  // === State === //
+  // const { defaultImgCollection, defaultPageNum } = states;
+  // const { defaultPageNum } = states;
 
-    // якщо різні імена то скидає Колекцію
-    if (prevImgName !== currentImgName) {
-      this.setState({ imgCollection: [], pageNum: 1 });
-    }
+  const [imgCollection, setImgCollection] = useState([]);
+  const [pageNum, setPageNum] = useState(1);
+  const [error, setError] = useState(null);
+  const [status, setStatus] = useState('idle');
 
-    // При зміні імені
-    if (prevImgName !== currentImgName || prevPageNum !== pageNum) {
-      this.setState({ status: 'pending' });
+  // console.log(defaultImgCollection);
+  // console.log(states);
 
-      // Вирішити проблему з проставленням по дефолту pageNum: 1 і imgCollection: []
-      fetchGallery(currentImgName, pageNum)
+  // скидає imgCollection і pageNum при зміні запиту
+  useEffect(() => {
+    setImgCollection([]);
+    console.log('до зміни', pageNum);
+    setPageNum(1);
+    console.log('після зміни', pageNum);
+  }, [imgName]);
+
+  //
+  useEffect(() => {
+    // console.log(defaultImgCollection);
+    // console.log(states);
+
+    if (imgName) {
+      setStatus('pending');
+      fetchGallery(imgName, pageNum)
         .then(gallery => {
-          this.setState(prevState => ({
-            imgCollection: [...prevState.imgCollection, ...gallery.hits],
-            status: 'resolved',
-          }));
+          setImgCollection(prevState => [...prevState, ...gallery.hits]);
+          setStatus('resolved');
+          if (pageNum > 1) {
+            window.scrollTo({
+              top: document.documentElement.scrollHeight,
+              behavior: 'smooth',
+            });
+          }
         })
-        .catch(error => this.setState({ error, status: 'rejected' }));
+        .catch(error => {
+          setError(error);
+          setStatus('rejected');
+        });
     }
+  }, [imgName, pageNum]);
 
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'smooth',
-    });
-  }
-
-  onLoadMoreBtnClick = () => {
-    this.setState(prevState => ({
-      pageNum: prevState.pageNum + 1,
-    }));
+  const onLoadMoreBtnClick = () => {
+    setPageNum(prevState => prevState + 1);
   };
 
-  onImageClick = e => {
+  const onImageClick = e => {
     const originalImage = e.target.dataset.original;
     // console.log(originalImage);
     const altImage = e.target.alt;
     // console.log(altImage);
-    this.props.getModalData(originalImage, altImage);
+    getModalData(originalImage, altImage);
   };
 
-  render() {
-    const { imgCollection, error, status } = this.state;
-    const { onLoadMoreBtnClick, onImageClick } = this;
-
-    if (status === 'idle') {
-      return (
-        <div className={s.idle}>
-          Давайте розпочнемо. Напишіть назву зображення в полі вище та
-          розпочніть пошук
-        </div>
-      );
-    }
-
-    if (status === 'pending') {
-      return (
-        <Loader
-          className={s.loader}
-          type="Grid"
-          color="#00BFFF"
-          height={80}
-          width={80}
-        />
-      );
-    }
-
-    if (imgCollection.length === 0 && status === 'resolved') {
-      return <ErrorView />;
-    }
-
-    if (status === 'resolved') {
-      return (
-        <>
-          <ul className={s.imageGallery}>
-            {/* {console.log(imgCollection)} */}
-            {imgCollection.map(({ webformatURL, largeImageURL, tags }, i) => (
-              <ImageGalleryItem
-                key={i}
-                smallImg={webformatURL}
-                largeImg={largeImageURL}
-                alt={tags}
-                onClick={onImageClick}
-              />
-            ))}
-          </ul>
-
-          {/* рендерить Button по умові */}
-          {imgCollection.length > 11 && (
-            <Button onLoadMoreBtnClick={onLoadMoreBtnClick} />
-          )}
-        </>
-      );
-    }
-
-    if (status === 'rejected') {
-      return <ErrorView errorMessage={error.message} />;
-    }
+  // return
+  if (status === 'idle') {
+    return (
+      <div className={s.idle}>
+        Давайте розпочнемо. Напишіть назву зображення в полі вище та розпочніть
+        пошук
+      </div>
+    );
   }
-}
+
+  if (status === 'pending') {
+    return (
+      <Loader
+        className={s.loader}
+        type="Grid"
+        color="#00BFFF"
+        height={80}
+        width={80}
+      />
+    );
+  }
+
+  if (imgCollection.length === 0 && status === 'resolved') {
+    return <ErrorView />;
+  }
+
+  if (status === 'resolved') {
+    return (
+      <>
+        <ul className={s.imageGallery}>
+          {/* {console.log(imgCollection)} */}
+          {imgCollection.map(({ webformatURL, largeImageURL, tags }, i) => (
+            <ImageGalleryItem
+              key={i}
+              smallImg={webformatURL}
+              largeImg={largeImageURL}
+              alt={tags}
+              onClick={onImageClick}
+            />
+          ))}
+        </ul>
+
+        {/* рендерить Button по умові */}
+        {imgCollection.length > 11 && (
+          <Button onLoadMoreBtnClick={onLoadMoreBtnClick} />
+        )}
+      </>
+    );
+  }
+
+  if (status === 'rejected') {
+    return <ErrorView errorMessage={error.message} />;
+  }
+};
+
+ImageGallery.propTypes = {
+  imgName: string.isRequired,
+  getModalData: func.isRequired,
+};
 
 export default ImageGallery;
