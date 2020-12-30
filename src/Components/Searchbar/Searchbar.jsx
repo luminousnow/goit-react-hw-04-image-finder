@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { func } from 'prop-types';
 import { toast } from 'react-toastify';
 import s from './Searchbar.module.css';
-
-const Searchbar = ({ onSubmit }) => {
+const Searchbar = ({ getImgName, resetStates }) => {
   // === State === //
   const [imgName, setImgName] = useState('');
 
@@ -24,8 +23,11 @@ const Searchbar = ({ onSubmit }) => {
     }
 
     // надсилає пропом imgCollection у Арр
-    onSubmit(imgName);
+    resetStates();
+    getImgName(imgName);
+    // console.log(imgName);
   };
+
   return (
     <>
       <header className={s.searchbar}>
@@ -50,7 +52,8 @@ const Searchbar = ({ onSubmit }) => {
 };
 
 Searchbar.propTypes = {
-  onSubmit: func.isRequired,
+  getImgName: func.isRequired,
+  resetStates: func.isRequired,
 };
 
 export default Searchbar;
