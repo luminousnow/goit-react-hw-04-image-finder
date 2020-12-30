@@ -7,3 +7,19 @@
   grid-gap: 16px;
   padding-bottom: 24px;
 }
+
+.loader {
+  position: fixed;
+  top: calc(50% - 40px);
+  left: calc(50% - 40px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.idle,
+.pending,
+.resolved,
+.rejected {
+  text-align: center;
+}

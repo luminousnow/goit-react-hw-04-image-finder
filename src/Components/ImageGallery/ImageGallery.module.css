@@ -13,19 +13,3 @@
   margin-left: auto;
   margin-right: auto;
 }
-
-.loader {
-  position: fixed;
-  top: calc(50% - 40px);
-  left: calc(50% - 40px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.idle,
-.pending,
-.resolved,
-.rejected {
-  text-align: center;
-}
