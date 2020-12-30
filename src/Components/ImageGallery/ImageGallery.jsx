@@ -8,6 +8,13 @@ import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
 
 import { string, func } from 'prop-types';
 
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
+
 const ImageGallery = ({ imgName, getModalData }) => {
   // === State === //
   // const { defaultImgCollection, defaultPageNum } = states;
@@ -16,7 +23,7 @@ const ImageGallery = ({ imgName, getModalData }) => {
   const [imgCollection, setImgCollection] = useState([]);
   const [pageNum, setPageNum] = useState(1);
   const [error, setError] = useState(null);
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState(Status.IDLE);
 
   // console.log(defaultImgCollection);
   // console.log(states);
@@ -33,25 +40,26 @@ const ImageGallery = ({ imgName, getModalData }) => {
   useEffect(() => {
     // console.log(defaultImgCollection);
     // console.log(states);
-
-    if (imgName) {
-      setStatus('pending');
-      fetchGallery(imgName, pageNum)
-        .then(gallery => {
-          setImgCollection(prevState => [...prevState, ...gallery.hits]);
-          setStatus('resolved');
-          if (pageNum > 1) {
-            window.scrollTo({
-              top: document.documentElement.scrollHeight,
-              behavior: 'smooth',
-            });
-          }
-        })
-        .catch(error => {
-          setError(error);
-          setStatus('rejected');
-        });
+    if (!imgName) {
+      return;
     }
+
+    setStatus(Status.PENDING);
+    fetchGallery(imgName, pageNum)
+      .then(gallery => {
+        setImgCollection(prevState => [...prevState, ...gallery.hits]);
+        setStatus(Status.RESOLVED);
+        if (pageNum > 1) {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth',
+          });
+        }
+      })
+      .catch(error => {
+        setError(error);
+        setStatus(Status.REJECTED);
+      });
   }, [imgName, pageNum]);
 
   const onLoadMoreBtnClick = () => {
@@ -67,7 +75,7 @@ const ImageGallery = ({ imgName, getModalData }) => {
   };
 
   // return
-  if (status === 'idle') {
+  if (status === Status.IDLE) {
     return (
       <div className={s.idle}>
         Давайте розпочнемо. Напишіть назву зображення в полі вище та розпочніть
@@ -76,7 +84,7 @@ const ImageGallery = ({ imgName, getModalData }) => {
     );
   }
 
-  if (status === 'pending') {
+  if (status === Status.PENDING) {
     return (
       <Loader
         className={s.loader}
@@ -88,11 +96,11 @@ const ImageGallery = ({ imgName, getModalData }) => {
     );
   }
 
-  if (imgCollection.length === 0 && status === 'resolved') {
+  if (imgCollection.length === 0 && status === Status.RESOLVED) {
     return <ErrorView />;
   }
 
-  if (status === 'resolved') {
+  if (status === Status.RESOLVED) {
     return (
       <>
         <ul className={s.imageGallery}>
@@ -116,7 +124,7 @@ const ImageGallery = ({ imgName, getModalData }) => {
     );
   }
 
-  if (status === 'rejected') {
+  if (status === Status.REJECTED) {
     return <ErrorView errorMessage={error.message} />;
   }
 };

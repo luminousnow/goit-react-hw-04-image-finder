@@ -13,12 +13,12 @@ const App = () => {
   const [lrgImg, setLrgImg] = useState('');
   const [altImg, setAltImg] = useState('');
 
-  // reverce showModal state
+  // тоглить модалку
   const toggleModal = () => {
     setShowModal(!showModal);
   };
 
-  // get large img, alt & change modal state to "true"
+  // отримує велике зображення, альт і змінює видимість модалки на "true"
   const getModalData = (gettinglargeImg, gettingAltImg) => {
     setLrgImg(gettinglargeImg);
     setAltImg(gettingAltImg);
